@@ -1,27 +1,22 @@
 import Foundation
+import AppKit
 
 @MainActor
 struct TerminalLauncher {
-    enum PermissionStatus: String {
+    enum PermissionStatus {
         case unknown
         case granted
         case denied
     }
 
     func checkPermission() -> PermissionStatus {
-        let result = runAppleScript("tell application \"Terminal\" to id")
-        if result == nil {
-            return .granted
-        }
-        return .denied
+        let terminalURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.Terminal")
+        return terminalURL != nil ? .granted : .denied
     }
 
     func requestPermission() -> PermissionStatus {
         let result = runAppleScript("tell application \"Terminal\" to id")
-        if result == nil {
-            return .granted
-        }
-        return .denied
+        return result == nil ? .granted : .denied
     }
 
     func launch(command: String) -> (error: String?, permissionDenied: Bool) {
@@ -30,9 +25,9 @@ struct TerminalLauncher {
             .replacingOccurrences(of: "\"", with: "\\\"")
 
         let script = """
-        tell application \"Terminal\"
+        tell application "Terminal"
             activate
-            do script \"\(escapedCommand)\"
+            do script "\(escapedCommand)"
         end tell
         """
 
@@ -60,20 +55,10 @@ struct TerminalLauncher {
 
     private func runAppleScript(_ script: String) -> String? {
         var error: NSDictionary?
-
-        guard let appleScript = NSAppleScript(source: script) else {
-            return "Could not prepare the script."
-        }
-
+        guard let appleScript = NSAppleScript(source: script) else { return "Could not prepare script." }
         _ = appleScript.executeAndReturnError(&error)
 
         guard let error else { return nil }
-
-        let errorNumber = error[NSAppleScript.errorNumber] as? Int
-        if errorNumber == -1743 {
-            return "permission_denied"
-        }
-
         return error[NSAppleScript.errorMessage] as? String ?? "Script error"
     }
 }

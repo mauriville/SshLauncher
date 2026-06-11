@@ -72,20 +72,22 @@ struct ContentView: View {
                 .frame(width: 8, height: 8)
 
             if viewModel.terminalPermission == .granted {
-                Text("Terminal Access: Granted")
+                Text("Terminal Access: Ready")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
-                Text("Terminal Access: Required")
+                Text("Terminal Not Found")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
-                Button("Grant Access") {
-                    viewModel.requestTerminalPermission()
+                Button("Open System Settings") {
+                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.general") {
+                        NSWorkspace.shared.open(url)
+                    }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.bordered)
                 .controlSize(.small)
             }
 
