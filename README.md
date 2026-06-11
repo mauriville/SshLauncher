@@ -59,4 +59,6 @@ Persistence uses `UserDefaults` with JSON-encoded arrays. Terminal integration u
 
 ## License
 
-This project is provided as-is. See individual files for copyright information.
+This project is licensed under the **GNU General Public License v3.0** — see the [LICENSE](LICENSE) file for details.
+
+This means anyone can use, study, and modify the code, but any derivative works must also be released under the GPL v3. If you're interested in using SshLauncher under a different license (e.g., for inclusion in a closed-source product), contact the author to discuss commercial licensing options.
