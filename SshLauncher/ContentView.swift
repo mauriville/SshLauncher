@@ -4,7 +4,7 @@ import AppKit
 struct ContentView: View {
     @ObservedObject var viewModel: ContentViewModel
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
-    @State private var windowWidth: CGFloat = 900
+    @State private var sidebarHidden = false
 
     init(viewModel: ContentViewModel) {
         self.viewModel = viewModel
@@ -52,16 +52,17 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear(perform: viewModel.loadEntries)
-        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didResizeNotification)) { notification in
-            guard let window = notification.object as? NSWindow else { return }
-            let newWidth = window.frame.width
-            if newWidth < 600 && windowWidth >= 600 {
+        .background(WindowSizeReader(onChange: { width in
+            let shouldHide = width < 560
+            let shouldShow = width >= 620
+            if shouldHide && !sidebarHidden {
+                sidebarHidden = true
                 columnVisibility = .detailOnly
-            } else if newWidth >= 600 && windowWidth < 600 {
+            } else if shouldShow && sidebarHidden {
+                sidebarHidden = false
                 columnVisibility = .all
             }
-            windowWidth = newWidth
-        }
+        }))
     }
 
     private var header: some View {
@@ -126,4 +127,44 @@ struct ContentView: View {
 
 #Preview {
     ContentView(viewModel: ContentViewModel())
+}
+
+struct WindowSizeReader: NSViewRepresentable {
+    let onChange: (CGFloat) -> Void
+
+    func makeNSView(context: Context) -> SizeTrackingView {
+        let view = SizeTrackingView()
+        view.onResize = onChange
+        return view
+    }
+
+    func updateNSView(_ nsView: SizeTrackingView, context: Context) {
+        nsView.onResize = onChange
+    }
+}
+
+class SizeTrackingView: NSView {
+    var onResize: ((CGFloat) -> Void)?
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard let window else { return }
+        onResize?(window.frame.width)
+        NotificationCenter.default.removeObserver(self)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowResized),
+            name: NSWindow.didResizeNotification,
+            object: window
+        )
+    }
+
+    @objc private func windowResized(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow else { return }
+        onResize?(window.frame.width)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 }
