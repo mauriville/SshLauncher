@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AppKit
 
 @main
 struct SshLauncherApp: App {
@@ -18,11 +19,9 @@ struct SshLauncherApp: App {
                 .toolbar {
                     ToolbarItem(placement: .navigation) {
                         Button {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                viewModel.toggleCompactSidebar()
-                            }
+                            NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
                         } label: {
-                            Label("Saved Hosts", systemImage: "sidebar.left")
+                            Label("Toggle Sidebar", systemImage: "sidebar.left")
                         }
                     }
 

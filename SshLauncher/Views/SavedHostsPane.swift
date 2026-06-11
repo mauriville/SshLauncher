@@ -57,11 +57,7 @@ struct SavedHostsPane: View {
             }
         }
         .padding(18)
-        .frame(width: 250)
         .frame(maxHeight: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
-        )
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 }
