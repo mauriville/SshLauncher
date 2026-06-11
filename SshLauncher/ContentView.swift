@@ -22,9 +22,7 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 18) {
                 header
 
-                if viewModel.showsPermissionNotice {
-                    permissionNotice
-                }
+                terminalStatusCard
 
                 ConnectionEditorCard(
                     sshUser: $viewModel.sshUser,
@@ -67,34 +65,38 @@ struct ContentView: View {
         .padding(.bottom, 4)
     }
 
-    private var permissionNotice: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "lock.shield")
-                .foregroundStyle(.secondary)
+    private var terminalStatusCard: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(viewModel.terminalPermission == .granted ? Color.green : Color.red)
+                .frame(width: 8, height: 8)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Terminal Permission Needed")
-                    .font(.headline)
-                Text("SshLauncher needs permission to control Terminal before it can prepare your SSH command. You can trigger the macOS prompt now.")
+            if viewModel.terminalPermission == .granted {
+                Text("Terminal Access: Granted")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("Terminal Access: Required")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
-                HStack(spacing: 8) {
-                    Button("Allow Terminal Access") {
-                        viewModel.requestTerminalPermission()
-                    }
-                    .buttonStyle(.borderedProminent)
+                Spacer()
 
-                    Button("Later") {
-                        viewModel.dismissPermissionNotice()
-                    }
-                    .buttonStyle(.bordered)
+                Button("Grant Access") {
+                    viewModel.requestTerminalPermission()
                 }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+            }
+
+            if viewModel.terminalPermission == .granted {
+                Spacer()
             }
         }
-        .padding(16)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(Color(nsColor: .controlBackgroundColor))
         )
     }
