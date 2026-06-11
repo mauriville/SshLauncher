@@ -2,10 +2,13 @@ import SwiftUI
 import AppKit
 
 struct ContentView: View {
-    @StateObject private var viewModel = ContentViewModel()
-    @State private var showsCompactSidebar = false
+    @ObservedObject var viewModel: ContentViewModel
 
     private let compactBreakpoint: CGFloat = 720
+
+    init(viewModel: ContentViewModel) {
+        self.viewModel = viewModel
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -13,15 +16,7 @@ struct ContentView: View {
 
             ZStack(alignment: .leading) {
                 VStack(spacing: 16) {
-                    TopBar(
-                        isCompact: isCompact,
-                        canSave: viewModel.canSave,
-                        showsSidebarToggle: isCompact,
-                        onToggleSidebar: toggleCompactSidebar,
-                        onNew: handleNewAction,
-                        onSave: viewModel.saveEntry,
-                        onLaunch: viewModel.launchTerminal
-                    )
+                    header(isCompact: isCompact)
 
                     HStack(spacing: 20) {
                         if !isCompact {
@@ -60,13 +55,13 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(nsColor: .windowBackgroundColor))
 
-                if isCompact && showsCompactSidebar {
+                if isCompact && viewModel.showsCompactSidebar {
                     Rectangle()
                         .fill(Color.black.opacity(0.18))
                         .ignoresSafeArea()
                         .onTapGesture {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                showsCompactSidebar = false
+                                viewModel.closeCompactSidebar()
                             }
                         }
 
@@ -84,14 +79,31 @@ struct ContentView: View {
                     .zIndex(1)
                 }
             }
-            .animation(.easeInOut(duration: 0.2), value: showsCompactSidebar)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.showsCompactSidebar)
             .onChange(of: isCompact) { _, compact in
                 if !compact {
-                    showsCompactSidebar = false
+                    viewModel.closeCompactSidebar()
                 }
             }
             .onAppear(perform: viewModel.loadEntries)
         }
+    }
+
+    @ViewBuilder
+    private func header(isCompact: Bool) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("SSH Launcher")
+                    .font(.system(size: isCompact ? 22 : 28, weight: .semibold))
+                Text("Keep a few connections handy and send the command to Terminal when you need it.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(isCompact ? 2 : 1)
+            }
+
+            Spacer()
+        }
+        .padding(.bottom, 4)
     }
 
     private func deleteSelectedEntry() {
@@ -100,22 +112,15 @@ struct ContentView: View {
     }
 
     private func handleNewAction() {
-        showsCompactSidebar = false
         viewModel.clearDraft()
     }
 
     private func handleCompactSidebarSelection() {
         viewModel.handleSelectionChange()
-        showsCompactSidebar = false
-    }
-
-    private func toggleCompactSidebar() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            showsCompactSidebar.toggle()
-        }
+        viewModel.closeCompactSidebar()
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(viewModel: ContentViewModel())
 }

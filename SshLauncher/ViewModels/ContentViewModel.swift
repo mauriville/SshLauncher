@@ -8,6 +8,7 @@ final class ContentViewModel: ObservableObject {
     @Published var sshUser = ""
     @Published var sshHost = ""
     @Published var launchErrorMessage: String?
+    @Published var showsCompactSidebar = false
 
     private let entryStore: SshEntryStore
     private let terminalLauncher: TerminalLauncher
@@ -94,6 +95,15 @@ final class ContentViewModel: ObservableObject {
         sshHost = ""
         selectedEntryID = nil
         launchErrorMessage = nil
+        showsCompactSidebar = false
+    }
+
+    func closeCompactSidebar() {
+        showsCompactSidebar = false
+    }
+
+    func toggleCompactSidebar() {
+        showsCompactSidebar.toggle()
     }
 
     private var trimmedUser: String {

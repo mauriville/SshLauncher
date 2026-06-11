@@ -9,11 +9,41 @@ import SwiftUI
 
 @main
 struct SshLauncherApp: App {
+    @StateObject private var viewModel = ContentViewModel()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: viewModel)
                 .frame(minWidth: 560, minHeight: 420)
+                .toolbar {
+                    ToolbarItem(placement: .navigation) {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                viewModel.toggleCompactSidebar()
+                            }
+                        } label: {
+                            Label("Saved Hosts", systemImage: "sidebar.left")
+                        }
+                    }
+
+                    ToolbarItem {
+                        Button {
+                            viewModel.clearDraft()
+                        } label: {
+                            Label("New Host", systemImage: "plus")
+                        }
+                    }
+                }
         }
         .defaultSize(width: 900, height: 560)
+        .windowToolbarStyle(.unified)
+        .commands {
+            CommandGroup(replacing: .newItem) {
+                Button("New Connection") {
+                    viewModel.clearDraft()
+                }
+                .keyboardShortcut("n")
+            }
+        }
     }
 }
