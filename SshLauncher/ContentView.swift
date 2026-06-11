@@ -3,13 +3,15 @@ import AppKit
 
 struct ContentView: View {
     @ObservedObject var viewModel: ContentViewModel
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    @State private var windowWidth: CGFloat = 900
 
     init(viewModel: ContentViewModel) {
         self.viewModel = viewModel
     }
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             SavedHostsPane(
                 entries: viewModel.entries,
                 selectedEntryID: viewModel.selectedEntryID,
@@ -17,36 +19,49 @@ struct ContentView: View {
                 onDelete: viewModel.delete,
                 onSelect: viewModel.select
             )
-            .navigationSplitViewColumnWidth(min: 220, ideal: 250)
+            .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 300)
         } detail: {
-            VStack(alignment: .leading, spacing: 18) {
-                header
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    header
 
-                terminalStatusCard
+                    terminalStatusCard
 
-                ConnectionEditorCard(
-                    sshUser: $viewModel.sshUser,
-                    sshHost: $viewModel.sshHost,
-                    canSave: viewModel.canSave,
-                    hasSelection: viewModel.selectedEntry != nil,
-                    onSave: viewModel.saveEntry,
-                    onLaunch: viewModel.launchTerminal,
-                    onDelete: deleteSelectedEntry
-                )
+                    ConnectionEditorCard(
+                        sshUser: $viewModel.sshUser,
+                        sshHost: $viewModel.sshHost,
+                        canSave: viewModel.canSave,
+                        hasSelection: viewModel.selectedEntry != nil,
+                        onSave: viewModel.saveEntry,
+                        onLaunch: viewModel.launchTerminal,
+                        onDelete: deleteSelectedEntry
+                    )
 
-                CommandPreviewCard(command: viewModel.draftCommand)
+                    CommandPreviewCard(command: viewModel.draftCommand)
 
-                if let launchErrorMessage = viewModel.launchErrorMessage {
-                    Text(launchErrorMessage)
-                        .font(.caption)
-                        .foregroundStyle(.red)
+                    if let launchErrorMessage = viewModel.launchErrorMessage {
+                        Text(launchErrorMessage)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
                 }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(Color(nsColor: .windowBackgroundColor))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear(perform: viewModel.loadEntries)
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didResizeNotification)) { notification in
+            guard let window = notification.object as? NSWindow else { return }
+            let newWidth = window.frame.width
+            if newWidth < 600 && windowWidth >= 600 {
+                columnVisibility = .detailOnly
+            } else if newWidth >= 600 && windowWidth < 600 {
+                columnVisibility = .all
+            }
+            windowWidth = newWidth
+        }
     }
 
     private var header: some View {

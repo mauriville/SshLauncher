@@ -15,7 +15,7 @@ struct SshLauncherApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(viewModel: viewModel)
-                .frame(minWidth: 560, minHeight: 420)
+                .frame(minWidth: 380, minHeight: 300)
                 .toolbar {
                     ToolbarItem {
                         Button {
