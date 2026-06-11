@@ -12,6 +12,8 @@ struct SshLauncherApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .frame(minWidth: 560, minHeight: 420)
         }
+        .defaultSize(width: 900, height: 560)
     }
 }
