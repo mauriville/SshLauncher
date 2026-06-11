@@ -29,12 +29,7 @@ struct TerminalLauncher {
         return runAppleScript("""
         tell application \"Terminal\"
             activate
-            if (count of windows) = 0 then
-                do script ""
-            else
-                reopen
-            end if
-            do script \"printf \\\"%s\\\" \\\"\(escapedCommand)\\\"\" in selected tab of front window
+            do script \"\(escapedCommand)\"
         end tell
         """)
     }

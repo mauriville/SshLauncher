@@ -9,13 +9,15 @@ struct SavedHostsPane: View {
     @State private var hoveredEntryID: UUID?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("Saved Hosts")
-                .font(.headline)
-                .padding(.horizontal, 4)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+                .padding(.leading, 6)
 
             if entries.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("No saved connections yet")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -29,28 +31,31 @@ struct SavedHostsPane: View {
                     Button {
                         onSelect(entry)
                     } label: {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(entry.user)
-                                .font(.headline)
-                                .foregroundStyle(.primary)
-                            Text(entry.host)
-                                .font(.subheadline)
+                        HStack(spacing: 6) {
+                            Image(systemName: "terminal")
+                                .font(.system(size: 11))
                                 .foregroundStyle(.secondary)
+                                .frame(width: 16)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(entry.user)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundStyle(.primary)
+                                Text(entry.host)
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .padding(.leading, 6)
                         .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
                                 .fill(backgroundColor(for: entry.id))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .strokeBorder(borderColor(for: entry.id))
                         )
                     }
                     .buttonStyle(.plain)
-                    .listRowInsets(EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6))
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
                     .onHover { isHovering in
                         hoveredEntryID = isHovering ? entry.id : nil
@@ -61,31 +66,24 @@ struct SavedHostsPane: View {
                         }
                     }
                 }
-                .listStyle(.inset)
+                .listStyle(.plain)
                 .scrollContentBackground(.hidden)
             }
         }
-        .padding(18)
+        .padding(.horizontal, 4)
+        .padding(.top, 14)
+        .padding(.bottom, 14)
         .frame(maxHeight: .infinity)
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .background(.thinMaterial)
     }
 
     private func backgroundColor(for entryID: UUID) -> Color {
         if selectedEntryID == entryID {
-            return Color.accentColor.opacity(0.16)
+            return Color.accentColor.opacity(0.18)
         }
 
         if hoveredEntryID == entryID {
-            return Color.white.opacity(0.08)
-        }
-
-        return .clear
-    }
-
-    private func borderColor(for entryID: UUID) -> Color {
-        if selectedEntryID == entryID {
-            return Color.white.opacity(0.16)
+            return Color.primary.opacity(0.06)
         }
 
         return .clear
