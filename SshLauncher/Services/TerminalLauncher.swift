@@ -2,21 +2,44 @@ import Foundation
 
 @MainActor
 struct TerminalLauncher {
+    private let permissionPromptKey = "terminalAutomationPermissionPromptShown"
+
+    func shouldShowPermissionNotice() -> Bool {
+        !UserDefaults.standard.bool(forKey: permissionPromptKey)
+    }
+
+    func requestAutomationPermissionIfNeeded() -> String? {
+        guard shouldShowPermissionNotice() else {
+            return nil
+        }
+
+        UserDefaults.standard.set(true, forKey: permissionPromptKey)
+        return runAppleScript("""
+        tell application \"Terminal\"
+            activate
+        end tell
+        """)
+    }
+
     func launch(command: String) -> String? {
         let escapedCommand = command
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
 
-        let script = """
+        return runAppleScript("""
         tell application \"Terminal\"
             activate
             if (count of windows) = 0 then
                 do script ""
+            else
+                reopen
             end if
-            do script \"printf \\\"%s\\\" \\\"\(escapedCommand)\\\"\" in front window
+            do script \"printf \\\"%s\\\" \\\"\(escapedCommand)\\\"\" in selected tab of front window
         end tell
-        """
+        """)
+    }
 
+    private func runAppleScript(_ script: String) -> String? {
         var error: NSDictionary?
 
         guard let appleScript = NSAppleScript(source: script) else {

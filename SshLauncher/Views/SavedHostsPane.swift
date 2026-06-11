@@ -2,10 +2,10 @@ import SwiftUI
 
 struct SavedHostsPane: View {
     let entries: [SshEntry]
-    @Binding var selectedEntryID: UUID?
+    let selectedEntryID: UUID?
     let onNew: () -> Void
     let onDelete: (SshEntry) -> Void
-    let onSelectionChange: () -> Void
+    let onSelect: (SshEntry) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -23,8 +23,10 @@ struct SavedHostsPane: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             } else {
-                List(selection: $selectedEntryID) {
-                    ForEach(entries) { entry in
+                List(entries, id: \.id) { entry in
+                    Button {
+                        onSelect(entry)
+                    } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(entry.user)
                                 .font(.headline)
@@ -35,18 +37,20 @@ struct SavedHostsPane: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, 4)
-                        .tag(entry.id)
-                        .contextMenu {
-                            Button("Delete") {
-                                onDelete(entry)
-                            }
+                        .padding(.horizontal, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(selectedEntryID == entry.id ? Color.accentColor.opacity(0.18) : .clear)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button("Delete") {
+                            onDelete(entry)
                         }
                     }
                 }
                 .listStyle(.inset)
-                .onChange(of: selectedEntryID) { _, _ in
-                    onSelectionChange()
-                }
             }
         }
         .padding(18)

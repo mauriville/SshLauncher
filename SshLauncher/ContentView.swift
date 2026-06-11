@@ -12,15 +12,19 @@ struct ContentView: View {
         NavigationSplitView {
             SavedHostsPane(
                 entries: viewModel.entries,
-                selectedEntryID: $viewModel.selectedEntryID,
+                selectedEntryID: viewModel.selectedEntryID,
                 onNew: viewModel.clearDraft,
                 onDelete: viewModel.delete,
-                onSelectionChange: viewModel.handleSelectionChange
+                onSelect: viewModel.select
             )
             .navigationSplitViewColumnWidth(min: 220, ideal: 250)
         } detail: {
             VStack(alignment: .leading, spacing: 18) {
                 header
+
+                if viewModel.showsPermissionNotice {
+                    permissionNotice
+                }
 
                 ConnectionEditorCard(
                     sshUser: $viewModel.sshUser,
@@ -61,6 +65,38 @@ struct ContentView: View {
             Spacer()
         }
         .padding(.bottom, 4)
+    }
+
+    private var permissionNotice: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "lock.shield")
+                .foregroundStyle(.secondary)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Terminal Permission Needed")
+                    .font(.headline)
+                Text("SshLauncher needs permission to control Terminal before it can prepare your SSH command. You can trigger the macOS prompt now.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Button("Allow Terminal Access") {
+                        viewModel.requestTerminalPermission()
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("Later") {
+                        viewModel.dismissPermissionNotice()
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(nsColor: .controlBackgroundColor))
+        )
     }
 
     private func deleteSelectedEntry() {

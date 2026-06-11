@@ -28,13 +28,5 @@ struct SshLauncherApp: App {
         }
         .defaultSize(width: 900, height: 560)
         .windowToolbarStyle(.unified)
-        .commands {
-            CommandGroup(replacing: .newItem) {
-                Button("New Connection") {
-                    viewModel.clearDraft()
-                }
-                .keyboardShortcut("n")
-            }
-        }
     }
 }

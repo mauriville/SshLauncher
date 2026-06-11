@@ -8,6 +8,7 @@ final class ContentViewModel: ObservableObject {
     @Published var sshUser = ""
     @Published var sshHost = ""
     @Published var launchErrorMessage: String?
+    @Published var showsPermissionNotice = false
 
     private let entryStore: SshEntryStore
     private let terminalLauncher: TerminalLauncher
@@ -44,6 +45,7 @@ final class ContentViewModel: ObservableObject {
 
     func loadEntries() {
         entries = entryStore.loadEntries()
+        showsPermissionNotice = terminalLauncher.shouldShowPermissionNotice()
     }
 
     func handleSelectionChange() {
@@ -57,6 +59,15 @@ final class ContentViewModel: ObservableObject {
 
     func launchTerminal() {
         launchErrorMessage = terminalLauncher.launch(command: draftCommand)
+    }
+
+    func requestTerminalPermission() {
+        launchErrorMessage = terminalLauncher.requestAutomationPermissionIfNeeded()
+        showsPermissionNotice = false
+    }
+
+    func dismissPermissionNotice() {
+        showsPermissionNotice = false
     }
 
     func saveEntry() {
