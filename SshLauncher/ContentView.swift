@@ -47,8 +47,8 @@ struct ContentView: View {
             .padding(16)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(Color(nsColor: .windowBackgroundColor))
-            .onAppear(perform: viewModel.loadEntries)
         }
+        .onAppear(perform: viewModel.loadEntries)
     }
 
     private var header: some View {

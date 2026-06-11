@@ -10,6 +10,8 @@ final class ContentViewModel: ObservableObject {
     @Published var launchErrorMessage: String?
     @Published var showsPermissionNotice = false
 
+    private var hasLoadedEntries = false
+
     private let entryStore: SshEntryStore
     private let terminalLauncher: TerminalLauncher
 
@@ -44,8 +46,11 @@ final class ContentViewModel: ObservableObject {
     }
 
     func loadEntries() {
+        guard !hasLoadedEntries else { return }
+
         entries = entryStore.loadEntries()
         showsPermissionNotice = terminalLauncher.shouldShowPermissionNotice()
+        hasLoadedEntries = true
     }
 
     func handleSelectionChange() {
