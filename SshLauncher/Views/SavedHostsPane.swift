@@ -25,6 +25,7 @@ struct SavedHostsPane: View {
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
+                .padding(.horizontal, 6)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             } else {
                 List(entries, id: \.id) { entry in
