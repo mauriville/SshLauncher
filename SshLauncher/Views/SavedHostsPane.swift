@@ -9,15 +9,8 @@ struct SavedHostsPane: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("Saved Hosts")
-                    .font(.headline)
-                Spacer()
-                Button("New") {
-                    onNew()
-                }
-                .buttonStyle(.borderless)
-            }
+            Text("Saved Hosts")
+                .font(.headline)
 
             if entries.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {

@@ -17,14 +17,6 @@ struct SshLauncherApp: App {
             ContentView(viewModel: viewModel)
                 .frame(minWidth: 560, minHeight: 420)
                 .toolbar {
-                    ToolbarItem(placement: .navigation) {
-                        Button {
-                            NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
-                        } label: {
-                            Label("Toggle Sidebar", systemImage: "sidebar.left")
-                        }
-                    }
-
                     ToolbarItem {
                         Button {
                             viewModel.clearDraft()
